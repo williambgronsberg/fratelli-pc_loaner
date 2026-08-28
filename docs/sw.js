@@ -1,10 +1,10 @@
-const CACHE = "fratelli-red-cross-v1";
+const CACHE = "fratelli-pc_loaner-v1";
 
 const STATIC_ASSETS = [
-  "/fratelli-red-cross/",
-  "/fratelli-red-cross/index.html",
-  "/fratelli-red-cross/manifest.json",
-  "/fratelli-red-cross/icon.svg"
+  "/fratelli-pc_loaner/",
+  "/fratelli-pc_loaner/index.html",
+  "/fratelli-pc_loaner/manifest.json",
+  "/fratelli-pc_loaner/icon.svg"
 ];
 
 self.addEventListener("install", (event) => {

@@ -9,7 +9,7 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
     },
   },
-  base: "/fratelli-red-cross/",
+  base: "/fratelli-pc_loaner/",
   build: {
     outDir: "dist",
   },
