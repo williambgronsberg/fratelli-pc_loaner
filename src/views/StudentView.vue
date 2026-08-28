@@ -8,7 +8,7 @@ const currentView = inject<ReturnType<typeof ref<ViewName>>>("currentView")!;
 const showToast = inject<(msg: string, type?: ToastType) => void>("showToast")!;
 const loading = inject<ReturnType<typeof ref<boolean>>>("loading")!;
 
-const { workstations, subscribeWorkstations, borrowWorkstation } = useDb();
+const { workstations, workstationsLoaded, subscribeWorkstations, borrowWorkstation } = useDb();
 const { login, sendPasswordReset } = useAuth();
 
 const showReset = ref(false);
@@ -112,9 +112,15 @@ onMounted(() => subscribeWorkstations());
   <div class="student-layout">
     <button class="admin-corner" @click="showLogin = true; nextTick(() => emailInput?.focus())">Admin</button>
 
-    <div v-if="workstations.length === 0" class="init-load">
+    <div v-if="!workstationsLoaded" class="init-load">
       <div class="loader-ring" />
       <p>Laster...</p>
+    </div>
+
+    <div v-else-if="workstations.length === 0" class="init-empty">
+      <p class="init-empty-title">Ingen enheter enda</p>
+      <p class="init-empty-sub">Det er ingen enheter å låne ennå. Logg inn som admin for å legge til din første enhet.</p>
+      <button class="btn-get-started" @click="showLogin = true; nextTick(() => emailInput?.focus())">Kom i gang</button>
     </div>
 
     <div v-else class="ws-scroll">
@@ -337,6 +343,51 @@ onMounted(() => subscribeWorkstations());
   font-size: 1rem;
   font-weight: 500;
   animation: loadPulse 1.5s ease-in-out infinite;
+}
+
+.init-empty {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.init-empty-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.init-empty-sub {
+  font-size: 0.9375rem;
+  color: #a3a3a3;
+  max-width: 340px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btn-get-started {
+  margin-top: 12px;
+  background: #f5c518;
+  color: #1a1a1a;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.btn-get-started:active {
+  transform: scale(0.96);
+  background: #f7cf3f;
 }
 
 @keyframes loadPulse {

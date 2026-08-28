@@ -25,6 +25,7 @@ export function useDb() {
   const workstations = ref<Workstation[]>([]);
   const activeBorrows = ref<BorrowRecord[]>([]);
   const loading = ref(false);
+  const workstationsLoaded = ref(false);
 
   let unsubWorkstations: (() => void) | null = null;
   let unsubBorrows: (() => void) | null = null;
@@ -62,8 +63,12 @@ export function useDb() {
         });
         list.sort((a, b) => a.name.localeCompare(b.name, "nb"));
         workstations.value = list;
+        workstationsLoaded.value = true;
       },
-      (err) => console.error("Workstations error:", err)
+      (err) => {
+        console.error("Workstations error:", err);
+        workstationsLoaded.value = true;
+      }
     );
   }
 
@@ -288,6 +293,7 @@ export function useDb() {
     workstations,
     activeBorrows,
     loading,
+    workstationsLoaded,
     subscribeWorkstations,
     subscribeActiveBorrows,
     borrowWorkstation,

@@ -14,6 +14,7 @@ const loading = inject<ReturnType<typeof ref<boolean>>>("loading")!;
 const { currentUser, logout } = useAuth();
 const {
   workstations,
+  workstationsLoaded,
   activeBorrows,
   subscribeWorkstations,
   subscribeActiveBorrows,
@@ -303,7 +304,16 @@ onMounted(() => {
         </div>
 
         <div class="card-list manage-list">
-          <div v-for="ws in workstations" :key="ws.id" class="card-row manage-row">
+          <div v-if="!workstationsLoaded" class="empty-state">Laster...</div>
+          <template v-else-if="workstations.length === 0">
+            <div class="empty-state empty-state-cta">
+              <p>Ingen enheter</p>
+              <p class="empty-state-sub">Du har ingen enheter ennå. Legg til din første enhet for å komme i gang.</p>
+              <button class="btn-get-started" @click="openAddSheet">Kom i gang</button>
+            </div>
+          </template>
+          <template v-else>
+            <div v-for="ws in workstations" :key="ws.id" class="card-row manage-row">
             <template v-if="editingWs === ws.id">
               <div class="edit-inline">
                 <div class="form-group">
@@ -347,7 +357,7 @@ onMounted(() => {
               >Fjern</button>
             </template>
           </div>
-          <div v-if="workstations.length === 0" class="empty-state">Ingen enheter</div>
+          </template>
         </div>
       </section>
     </main>
@@ -879,6 +889,43 @@ onMounted(() => {
   color: #666666;
   padding: 32px 16px;
   font-size: 0.875rem;
+}
+
+.empty-state-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+}
+
+.empty-state-cta p {
+  margin: 0;
+}
+
+.empty-state-sub {
+  color: #999999;
+  font-size: 0.8125rem;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.empty-state-cta .btn-get-started {
+  margin-top: 12px;
+  background: #f5c518;
+  color: #1d1d1f;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 100px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.empty-state-cta .btn-get-started:active {
+  transform: scale(0.96);
+  background: #f7cf3f;
 }
 
 /* ===== Inputs ===== */
