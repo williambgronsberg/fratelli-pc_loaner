@@ -1,10 +1,10 @@
-const CACHE = "rc-utstyr-v2";
+const CACHE = "fratelli-red-cross-v1";
 
 const STATIC_ASSETS = [
-  "/pc_loaner/",
-  "/pc_loaner/index.html",
-  "/pc_loaner/manifest.json",
-  "/pc_loaner/icon.svg"
+  "/fratelli-red-cross/",
+  "/fratelli-red-cross/index.html",
+  "/fratelli-red-cross/manifest.json",
+  "/fratelli-red-cross/icon.svg"
 ];
 
 self.addEventListener("install", (event) => {

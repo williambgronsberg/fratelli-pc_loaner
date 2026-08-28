@@ -160,6 +160,3 @@ For et resepsjonssystem med normal bruk vil dette være mer enn nok.
 ## Lisens
 
 Dette prosjektet er laget for Fratelli Red Cross og er fritt tilgjengelig.
-# fratelli-pc_loaner
-# fratelli-pc_loaner
-# fratelli-pc_loaner
