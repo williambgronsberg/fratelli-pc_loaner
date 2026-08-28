@@ -1,0 +1,19 @@
+{
+  "name": "Lån utstyr",
+  "short_name": "Lån utstyr",
+  "description": "Lån og returner utstyr",
+  "start_url": "/fratelli-red-cross/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a1a",
+  "theme_color": "#f5c518",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
