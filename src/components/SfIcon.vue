@@ -57,6 +57,11 @@ const icons: Record<string, string> = {
   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
   <polyline points="22 4 12 14.01 9 11.01" />
 </svg>`,
+  "questionmark.circle": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M9.5 9a2.5 2.5 0 0 1 4.9.75c0 1.75-2.4 2.25-2.4 3.75" />
+  <circle cx="12" cy="17" r="0.5" fill="currentColor" />
+</svg>`,
 };
 </script>
 

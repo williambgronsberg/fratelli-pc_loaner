@@ -6,6 +6,7 @@ import { useDb } from "@/composables/useDb";
 import SfIcon from "@/components/SfIcon.vue";
 import ConfirmSheet from "@/components/ConfirmSheet.vue";
 import BaseSheet from "@/components/BaseSheet.vue";
+import OnboardingTour, { type TourStep } from "@/components/OnboardingTour.vue";
 
 const currentView = inject<ReturnType<typeof ref<ViewName>>>("currentView")!;
 const showToast = inject<(msg: string, type?: ToastType) => void>("showToast")!;
@@ -35,6 +36,36 @@ const tabs = [
   { key: "manage", label: "Enheter", icon: "gear" },
 ] as const;
 const userEmail = computed(() => currentUser.value?.email ?? "");
+
+const ONBOARDING_KEY = "fratelli-admin-onboarded-v1";
+const showTour = ref(false);
+const tourSteps: TourStep[] = [
+  { selector: "", placement: "center", title: "Velkommen til admin-panelet 👋",
+    text: "Her styrer du utlån, ser historikk og administrerer enheter. Ta en rask rundtur før du setter i gang." },
+  { selector: '[data-tour="tab-borrows"]', tab: "borrows", title: "Utlån",
+    text: "Her ser du hvilket utstyr som er lånt ut akkurat nå, av hvem, og kan registrere retur med ett trykk." },
+  { selector: '[data-tour="tab-history"]', tab: "history", title: "Historikk",
+    text: "Full oversikt over tidligere utlån. Eldre poster blir automatisk anonymisert for personvern." },
+  { selector: '[data-tour="tab-manage"]', tab: "manage", title: "Enheter",
+    text: "Legg til, rediger eller fjern PC-er og annet utstyr som kan lånes ut herfra." },
+  { selector: '[data-tour="add-fab"]', tab: "manage", title: "Legg til enhet",
+    text: "Trykk her for å registrere en ny enhet — velg type, navn og hva som følger med." },
+  { selector: "", placement: "center", title: "Klar til å starte!",
+    text: "Du finner denne rundturen igjen når som helst nederst i menyen. Lykke til!" },
+];
+
+function startTour() {
+  menuOpen.value = false;
+  showTour.value = true;
+}
+function closeTour() {
+  showTour.value = false;
+  localStorage.setItem(ONBOARDING_KEY, "1");
+}
+function handleTourTabSwitch(tab: string) {
+  activeTab.value = tab as TabName;
+  if (tab === "history" && historyRecords.value.length === 0) loadHistory();
+}
 const historyRecords = ref<any[]>([]);
 const historyLastDoc = ref<any>(null);
 const showAddSheet = ref(false);
@@ -219,6 +250,9 @@ function formatDate(ts: any) {
 onMounted(() => {
   subscribeWorkstations();
   subscribeActiveBorrows();
+  if (!localStorage.getItem(ONBOARDING_KEY)) {
+    setTimeout(() => { showTour.value = true; }, 400);
+  }
 });
 </script>
 
@@ -241,6 +275,7 @@ onMounted(() => {
           v-for="tab in tabs"
           :key="tab.key"
           class="sidebar-item"
+          :data-tour="`tab-${tab.key}`"
           :class="{ active: activeTab === tab.key }"
           @click="switchTab(tab.key)"
         >
@@ -249,6 +284,9 @@ onMounted(() => {
         </button>
       </nav>
       <div class="sidebar-footer">
+        <button class="sidebar-help" @click="startTour">
+          <SfIcon name="questionmark.circle" :size="16" /><span>Vis rundtur</span>
+        </button>
         <div class="sidebar-email">{{ userEmail }}</div>
       </div>
     </aside>
@@ -300,7 +338,7 @@ onMounted(() => {
       <section v-show="activeTab === 'manage'">
         <div class="manage-header">
           <h2 class="section-title">Enheter</h2>
-          <button class="btn-add-fab" @click="openAddSheet" aria-label="Legg til enhet">+</button>
+          <button class="btn-add-fab" data-tour="add-fab" @click="openAddSheet" aria-label="Legg til enhet">+</button>
         </div>
 
         <div class="card-list manage-list">
@@ -407,6 +445,9 @@ onMounted(() => {
       <button type="button" class="btn btn-secondary btn-full" style="margin-top: 10px;" @click="showAddSheet = false">Avbryt</button>
     </form>
   </BaseSheet>
+
+  <OnboardingTour :show="showTour" :steps="tourSteps"
+    @close="closeTour" @finish="closeTour" @switch-tab="handleTourTabSwitch" />
 </template>
 <style scoped>
 .admin-split {
@@ -565,6 +606,13 @@ onMounted(() => {
   padding: 14px 20px;
   border-top: 1px solid #333333;
 }
+
+.sidebar-help {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  background: none; border: none; color: #999999; font-size: 0.8125rem;
+  padding: 6px 0 10px; cursor: pointer; transition: color 0.15s;
+}
+.sidebar-help:active { color: #f5c518; }
 
 .sidebar-email {
   font-size: 0.75rem;
