@@ -60,11 +60,23 @@ function startTour() {
 }
 function closeTour() {
   showTour.value = false;
+  menuOpen.value = false;
   localStorage.setItem(ONBOARDING_KEY, "1");
 }
-function handleTourTabSwitch(tab: string) {
+function handleTourTabSwitch(tab: string, selector?: string) {
   activeTab.value = tab as TabName;
   if (tab === "history" && historyRecords.value.length === 0) loadHistory();
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 700;
+  if (isMobile) {
+    if (selector?.includes('tab-')) {
+      menuOpen.value = true;
+    } else if (selector?.includes('add-fab')) {
+      menuOpen.value = false;
+    } else if (!selector) {
+      // center steps -> close menu
+      menuOpen.value = false;
+    }
+  }
 }
 const historyRecords = ref<any[]>([]);
 const historyLastDoc = ref<any>(null);
@@ -258,7 +270,7 @@ onMounted(() => {
 
 <template>
   <div class="admin-split">
-    <button class="menu-toggle" :class="{ hidden: menuOpen || confirmState !== null || showAddSheet }" @click="menuOpen = true" aria-label="Åpne meny">
+    <button class="menu-toggle" :class="{ hidden: menuOpen || confirmState !== null || showAddSheet || showTour }" @click="menuOpen = true" aria-label="Åpne meny">
       <SfIcon name="line.3.horizontal" :size="22" />
       <span>Meny</span>
     </button>

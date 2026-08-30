@@ -17,7 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: [];
   finish: [];
-  "switch-tab": [tab: string];
+  "switch-tab": [tab: string, selector?: string];
 }>();
 
 const stepIndex = ref(0);
@@ -32,10 +32,12 @@ async function positionForStep() {
   if (!step) return;
 
   if (step.tab) {
-    emit("switch-tab", step.tab);
+    emit("switch-tab", step.tab, step.selector);
   }
   await nextTick();
-  await new Promise((r) => setTimeout(r, 60));
+  // longer wait on mobile for bottom-sheet animation (0.22s)
+  const isMobile = window.innerWidth <= 700;
+  await new Promise((r) => setTimeout(r, isMobile ? 320 : 60));
 
   if (step.placement === "center" || !step.selector) {
     rect.visible = false;
@@ -56,6 +58,8 @@ async function positionForStep() {
   }
 
   el.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+  // wait for scrollIntoView + sheet settle on mobile
+  if (isMobile) await new Promise((r) => setTimeout(r, 80));
   const r = el.getBoundingClientRect();
   const pad = 8;
   rect.top = r.top - pad;
@@ -64,20 +68,50 @@ async function positionForStep() {
   rect.height = r.height + pad * 2;
   rect.visible = true;
 
-  tooltipStyle.transform = "none";
   const spaceBelow = window.innerHeight - r.bottom;
   const wantsTop = step.placement === "top" || spaceBelow < 180;
 
-  if (wantsTop) {
-    tooltipStyle.top = undefined;
-    tooltipStyle.bottom = `${window.innerHeight - r.top + 16}px`;
+  if (isMobile) {
+    // mobile: center tooltip horizontally, avoid covering bottom sheet
+    tooltipStyle.left = "50%";
+    tooltipStyle.transform = "translateX(-50%)";
+    if (step.selector.includes("tab-")) {
+      // tabs live inside bottom sheet -> place tooltip above sheet near top
+      // estimate sheet top: use r.top; place tooltip 16px above tab -> still inside sheet area
+      // instead place tooltip in upper half to stay visible
+      const isInBottomHalf = r.top > window.innerHeight * 0.45;
+      if (isInBottomHalf) {
+        tooltipStyle.bottom = undefined;
+        // place tooltip ~18% from top so it doesn't get clipped by sheet
+        const topPos = Math.max(16, r.top - 180);
+        // ensure at least 12px from top and not overlapping sheet
+        tooltipStyle.top = `${Math.min(topPos, window.innerHeight * 0.32)}px`;
+      } else {
+        tooltipStyle.bottom = undefined;
+        tooltipStyle.top = `${r.bottom + 16}px`;
+      }
+    } else {
+      // add-fab or other in main content -> place below element, centered
+      tooltipStyle.bottom = undefined;
+      if (wantsTop) {
+        tooltipStyle.top = undefined;
+        tooltipStyle.bottom = `${window.innerHeight - r.top + 16}px`;
+      } else {
+        tooltipStyle.top = `${r.bottom + 16}px`;
+      }
+    }
   } else {
-    tooltipStyle.bottom = undefined;
-    tooltipStyle.top = `${r.bottom + 16}px`;
+    tooltipStyle.transform = "none";
+    if (wantsTop) {
+      tooltipStyle.top = undefined;
+      tooltipStyle.bottom = `${window.innerHeight - r.top + 16}px`;
+    } else {
+      tooltipStyle.bottom = undefined;
+      tooltipStyle.top = `${r.bottom + 16}px`;
+    }
+    const left = Math.min(Math.max(r.left, 16), window.innerWidth - 296);
+    tooltipStyle.left = `${Math.max(left, 16)}px`;
   }
-
-  const left = Math.min(Math.max(r.left, 16), window.innerWidth - 296);
-  tooltipStyle.left = `${Math.max(left, 16)}px`;
 }
 
 function next() {
@@ -204,4 +238,18 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
 .tour-btn-secondary { background: none; border: 1px solid #48484a; color: #ffffff; }
 .tour-fade-enter-active, .tour-fade-leave-active { transition: opacity 0.2s ease; }
 .tour-fade-enter-from, .tour-fade-leave-to { opacity: 0; }
+
+@media (max-width: 700px) {
+  .tour-card {
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    padding: 16px 16px calc(14px + env(safe-area-inset-bottom));
+    border-radius: 16px;
+  }
+  .tour-hole { border-radius: 12px; border-width: 1.5px; }
+  .tour-title { font-size: 0.9375rem; }
+  .tour-text { font-size: 0.8125rem; }
+  .tour-btn { padding: 10px 18px; min-height: 40px; }
+  .tour-skip { min-height: 40px; display: inline-flex; align-items: center; }
+}
 </style>
