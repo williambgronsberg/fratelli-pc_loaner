@@ -179,7 +179,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
           title="Trykk for å gå videre"
         />
 
-        <div class="tour-card" :style="tooltipStyle">
+        <div class="tour-card" :style="tooltipStyle" @click.self="next">
           <div class="tour-progress">
             <span
               v-for="(_, i) in steps"
@@ -190,15 +190,10 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
           </div>
           <div class="tour-title">{{ steps[stepIndex]?.title }}</div>
           <div class="tour-text">{{ steps[stepIndex]?.text }}</div>
-          <div v-if="rect.visible" class="tour-hint">Trykk på den gule markeringen for å fortsette →</div>
+          <div class="tour-hint">{{ rect.visible ? "Trykk på den gule markeringen for å fortsette →" : "Trykk på kortet for å fortsette →" }}</div>
           <div class="tour-actions">
             <button class="tour-skip" @click="skip">Hopp over</button>
-            <div class="tour-nav">
-              <button v-if="!isFirst()" class="tour-btn tour-btn-secondary" @click="prev">Tilbake</button>
-              <button class="tour-btn tour-btn-primary" @click="next">
-                {{ isLast() ? "Ferdig" : "Neste" }}
-              </button>
-            </div>
+            <button v-if="!isFirst()" class="tour-btn tour-btn-secondary" @click="prev">Tilbake</button>
           </div>
         </div>
       </div>
