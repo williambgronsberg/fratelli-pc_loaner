@@ -49,7 +49,8 @@ async function positionForStep() {
   }
 
   const el = document.querySelector(step.selector) as HTMLElement | null;
-  if (!el) {
+  const isHidden = !el || el.getBoundingClientRect().width === 0 || (el.offsetParent === null && getComputedStyle(el).display === "none");
+  if (isHidden) {
     rect.visible = false;
     tooltipStyle.top = "50%";
     tooltipStyle.left = "50%";
@@ -165,13 +166,17 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
         <div class="tour-scrim" @click="skip" />
         <div
           v-if="rect.visible"
-          class="tour-hole"
+          class="tour-hole tour-hole-interactive"
           :style="{
             top: rect.top + 'px',
             left: rect.left + 'px',
             width: rect.width + 'px',
             height: rect.height + 'px',
           }"
+          @click="next"
+          role="button"
+          aria-label="Trykk for å gå videre"
+          title="Trykk for å gå videre"
         />
 
         <div class="tour-card" :style="tooltipStyle">
@@ -185,6 +190,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
           </div>
           <div class="tour-title">{{ steps[stepIndex]?.title }}</div>
           <div class="tour-text">{{ steps[stepIndex]?.text }}</div>
+          <div v-if="rect.visible" class="tour-hint">Trykk på den gule markeringen for å fortsette →</div>
           <div class="tour-actions">
             <button class="tour-skip" @click="skip">Hopp over</button>
             <div class="tour-nav">
@@ -211,6 +217,13 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
   transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
   pointer-events: none;
 }
+.tour-hole-interactive {
+  pointer-events: auto;
+  cursor: pointer;
+  animation: holePulse 1.6s ease-in-out infinite;
+}
+.tour-hole-interactive:active { transform: scale(0.99); }
+@keyframes holePulse { 0%,100% { border-color: #f5c518; box-shadow: 0 0 0 4000px rgba(0,0,0,0.62), 0 0 0 0 rgba(245,197,24,0.3); } 50% { border-color: #ffdf5a; box-shadow: 0 0 0 4000px rgba(0,0,0,0.62), 0 0 0 8px rgba(245,197,24,0.2); } }
 .tour-card {
   position: fixed;
   width: 280px;
@@ -227,7 +240,9 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
 .tour-dot { width: 6px; height: 6px; border-radius: 50%; background: #48484a; transition: background 0.2s, width 0.2s; }
 .tour-dot.active { background: #f5c518; width: 16px; border-radius: 3px; }
 .tour-title { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
-.tour-text { font-size: 0.875rem; color: #c7c7cc; line-height: 1.4; margin-bottom: 16px; }
+.tour-text { font-size: 0.875rem; color: #c7c7cc; line-height: 1.4; margin-bottom: 12px; }
+.tour-hint { font-size: 0.75rem; color: #f5c518; margin-bottom: 12px; font-style: italic; animation: tourPulse 1.6s ease-in-out infinite; }
+@keyframes tourPulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
 .tour-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .tour-skip { background: none; border: none; color: #8e8e93; font-size: 0.8125rem; cursor: pointer; padding: 6px 2px; }
 .tour-skip:active { color: #ff6961; }

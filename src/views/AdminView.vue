@@ -39,7 +39,7 @@ const userEmail = computed(() => currentUser.value?.email ?? "");
 
 const ONBOARDING_KEY = "fratelli-admin-onboarded-v1";
 const showTour = ref(false);
-const tourSteps: TourStep[] = [
+const baseTourSteps: TourStep[] = [
   { selector: "", placement: "center", title: "Velkommen til admin-panelet 👋",
     text: "Her styrer du utlån, ser historikk og administrerer enheter. Ta en rask rundtur før du setter i gang." },
   { selector: '[data-tour="tab-borrows"]', tab: "borrows", title: "Utlån",
@@ -53,6 +53,21 @@ const tourSteps: TourStep[] = [
   { selector: "", placement: "center", title: "Klar til å starte!",
     text: "Du finner denne rundturen igjen når som helst nederst i menyen. Lykke til!" },
 ];
+const tourSteps = computed<TourStep[]>(() => {
+  // On mobile, insert interactive menu step after welcome so user must tap the pill button
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 700;
+  if (isMobile) {
+    const steps = [...baseTourSteps];
+    steps.splice(1, 0, {
+      selector: '[data-tour="menu-toggle"]',
+      title: "Meny",
+      text: "På mobil åpner du menyen her. Trykk på den gule markeringen for å fortsette.",
+      placement: "top" as const,
+    });
+    return steps;
+  }
+  return baseTourSteps;
+});
 
 function startTour() {
   menuOpen.value = false;
@@ -270,7 +285,7 @@ onMounted(() => {
 
 <template>
   <div class="admin-split">
-    <button class="menu-toggle" :class="{ hidden: menuOpen || confirmState !== null || showAddSheet || showTour }" @click="menuOpen = true" aria-label="Åpne meny">
+    <button class="menu-toggle" data-tour="menu-toggle" :class="{ hidden: menuOpen || confirmState !== null || showAddSheet }" @click="menuOpen = true" aria-label="Åpne meny">
       <SfIcon name="line.3.horizontal" :size="22" />
       <span>Meny</span>
     </button>
