@@ -193,7 +193,10 @@ onBeforeUnmount(() => window.removeEventListener("resize", onResize));
           <div class="tour-hint">{{ rect.visible ? "Trykk på den gule markeringen for å fortsette →" : "Trykk på kortet for å fortsette →" }}</div>
           <div class="tour-actions">
             <button class="tour-skip" @click="skip">Hopp over</button>
-            <button v-if="!isFirst()" class="tour-btn tour-btn-secondary" @click="prev">Tilbake</button>
+            <div class="tour-nav">
+              <button v-if="!isFirst()" class="tour-btn tour-btn-secondary" @click="prev">Tilbake</button>
+              <button v-if="isFirst()" class="tour-btn tour-btn-primary" @click="next">Neste</button>
+            </div>
           </div>
         </div>
       </div>
